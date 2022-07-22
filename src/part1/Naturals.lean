@@ -103,10 +103,49 @@ theorem succ_neq_zero (n : Nat) (h : succ n = zero) : False
 theorem succ_neq_zero' (n : Nat) (h : succ n = zero) : False
   := by contradiction
   
+-- Exercises
 
+-- seven
+example : (7 : Nat) = succ (succ (succ (succ (succ (succ (succ zero)))))) := rfl
 
+-- +-example
+example : 3 + 4 = (7 : Nat) :=
+  calc
+    3 + 4
+      = (succ (3 + 3) : Nat)                      := rfl
+    _ = (succ (succ (3 + 2)) : Nat)               := rfl
+    _ = (succ (succ (succ (3 + 1))) : Nat)        := rfl
+    _ = (succ (succ (succ (succ (3 + 0)))) : Nat) := rfl
+    _ = (succ (succ (succ (succ 3))) : Nat)       := rfl
+    _ = (7 : Nat)                                 := rfl
 
+-- *-example
+example : 3 * 4 = (12 : Nat) :=
+  calc
+    3 * 4
+      = ((3 * 3) + 3 : Nat) := rfl
+    _ = (((3 * 2) + 3) + 3 : Nat) := rfl
+    _ = ((((3 * 1) + 3) + 3) + 3 : Nat) := rfl
+    _ = (((((3 * 0) + 3) + 3) + 3) + 3 : Nat) := rfl
+    _ = ((((0 + 3) + 3) + 3) + 3 : Nat) := rfl
+    _ = (12 : Nat) := rfl
 
+-- _^_
+def pow : Nat -> Nat -> Nat
+| _, zero => 1
+| m, succ n => m * (pow m n)
 
+-- from lean4/src/Init/Notation.lean (simplified)
+-- infixr:80 " ^ "   => Pow.Pow
+instance : Pow Nat Nat where
+  pow := pow
 
-
+example : 3 ^ 4 = (81 : Nat) :=
+  calc
+    3 ^ 4
+      = (3 * (3 ^ 3) : Nat) := rfl
+    _ = (3 * (3 * (3 ^ 2)) : Nat) := rfl
+    _ = (3 * (3 * (3 * (3 ^ 1))) : Nat) := rfl
+    _ = (3 * (3 * (3 * (3 * (3 ^ 0)))) : Nat) := rfl
+    _ = (3 * (3 * (3 * (3 * 1))) : Nat) := rfl
+    _ = (81 : Nat) := rfl
