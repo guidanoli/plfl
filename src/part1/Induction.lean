@@ -104,8 +104,130 @@ instance : Monoid Nat where
 
 -- exercises
 
-theorem left_distrib (m n p : Nat) :
-  m * (n + p) = m * n + m * p := sorry
+-- operators
 
+-- another pair of operators that have an identity (1) and
+-- are associative (2), commutative (3) and distributive (4) are
+-- the logical AND and OR.
+-- 
+-- (1) X AND TRUE = X
+--     X OR FALSE = X
+-- (2) X AND (Y AND Z) = (X AND Y) AND Z
+--     X OR (Y OR Z) = (X OR Y) OR Z
+-- (3) X AND (Y OR Z) = (X AND Y) OR (X AND Z)
 
+-- A pair of operators that has an identity (1), is associative (2)
+-- but is not commutative (3) is the matrix multiplication operator
+--
+-- A . I = A, where I is the identity matrix
+-- A . (B . C) = (A . B) . C
+-- There exists A and B such that A . B /= B . A
 
+-- *-distrib-+
+theorem left_distrib : ∀ (m n p : Nat),
+  m * (n + p) = m * n + m * p
+  :=
+    by
+    intros m n p
+    induction p with
+    | zero => rfl
+    | succ p ih =>
+      calc
+        m * (n + succ p)
+          = m * succ (n + p) := by rw [add_succ]
+        _ = m * (n + p) + m := rfl
+        _ = m * n + m * p + m := by rw [ih]
+        _ = m * n + (m * p + m) := by rw [add_assoc]
+        _ = m * n + (m * (succ p)) := rfl
+
+-- *-assoc
+theorem mul_assoc : ∀ (m n p : Nat),
+  m * (n * p) = (m * n) * p
+  :=
+    by
+    intros m n p
+    induction p with
+    | zero => rfl
+    | succ p ih =>
+      calc
+        m * (n * succ p)
+          = m * (n * p + n) := rfl
+        _ = m * (n * p) + m * n := by rw [left_distrib]
+        _ = (m * n) * p + m * n := by rw [ih]
+        _ = (m * n) * succ p := rfl
+
+theorem zero_mul : ∀ (m : Nat), zero * m = zero :=
+  by
+  intros m
+  induction m with
+  | zero => rfl
+  | succ m ih =>
+    calc
+      zero * (succ m)
+        = zero * m + zero := rfl
+      _ = zero + zero     := by rw [ih]
+      _ = zero            := rfl
+
+theorem mul_one : ∀ (m : Nat), m * 1 = m :=
+  by
+    intros m
+    calc
+      m * 1
+        = m * 0 + m := rfl
+      _ = 0 + m     := rfl
+      _ = m + 0     := by rw [comm_add]
+      _ = m         := rfl
+
+theorem one_mul : ∀ (m : Nat), 1 * m = m :=
+  by
+    intros m
+    induction m with
+    | zero => rfl
+    | succ m ih =>
+      calc
+        1 * (succ m)
+          = 1 * m + 1 := rfl
+        _ = m + 1 := by rw [ih]
+        _ = succ m := rfl
+
+theorem right_distrib : ∀ (m n p : Nat),
+  (m + n) * p = m * p + n * p
+  :=
+    by
+    intros m n p
+    induction p with
+    | zero => rfl
+    | succ p ih =>
+      calc
+        (m + n) * succ p
+          = (m + n) * p + (m + n) := by rfl
+        _ = (m * p + n * p) + (m + n) := by rw [ih]
+        _ = ((m * p + n * p) + m) + n := by rw [add_assoc]
+        _ = (m * p + (n * p + m)) + n := by rw [add_assoc]
+        _ = (m * p + (m + n * p)) + n := by rw [comm_add m _]
+        _ = ((m * p + m) + n * p) + n := by rw [add_assoc]
+        _ = (m * p + m) + (n * p + n) := by rw [add_assoc]
+        _ = (m * p + m) + (n * p + n) := by rw [add_assoc]
+        _ = m * succ p + (n * p + n) := rfl
+        _ = m * succ p + n * succ p := rfl
+
+-- *-comm
+theorem mul_comm : ∀ (m n : Nat),
+  m * n = n * m
+  :=
+    by
+    intros m n
+    induction n with
+    | zero =>
+      calc
+        m * zero
+          = zero := rfl
+        _ = zero * m := by rw [zero_mul]
+    | succ n ih =>
+      calc
+        m * (succ n)
+          = m * n + m := rfl
+        _ = n * m + m := by rw [ih]
+        _ = n * m + 1 * m := by rw [one_mul]
+        _ = (n + 1) * m := by rw [right_distrib]
+        _ = (succ n) * m := rfl
