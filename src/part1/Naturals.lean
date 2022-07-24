@@ -149,12 +149,3 @@ example : 3 ^ 4 = (81 : Nat) :=
     _ = (3 * (3 * (3 * (3 * (3 ^ 0)))) : Nat) := rfl
     _ = (3 * (3 * (3 * (3 * 1))) : Nat) := rfl
     _ = (81 : Nat) := rfl
-
--- 0∸n≡0 (No, it did not require induction...)
-theorem zero_monus : ∀ (n : Nat), zero - n = zero
-| zero => rfl
-| succ _ => rfl
-
-theorem monus_zero : ∀ (n : Nat), n - zero = n
-| zero => rfl
-| succ _ => rfl

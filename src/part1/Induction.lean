@@ -231,3 +231,88 @@ theorem mul_comm : ∀ (m n : Nat),
         _ = n * m + 1 * m := by rw [one_mul]
         _ = (n + 1) * m := by rw [right_distrib]
         _ = (succ n) * m := rfl
+
+-- 0∸n≡0
+theorem zero_sub : ∀ (n : Nat), 0 - n = 0
+:=
+  by
+  intros n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    calc
+      0 - succ n
+        = pred (0 - n) := rfl
+      _ = pred 0 := by rw [ih]
+      _ = 0 := rfl
+
+-- ∸-+-assoc
+theorem sub_add_assoc : ∀ (m n p : Nat), m - n - p = m - (n + p)
+:=
+  by
+  intros m n p
+  induction p with
+  | zero => rfl
+  | succ p ih =>
+    calc
+      m - n - succ p
+        = pred (m - n - p) := rfl
+      _ = pred (m - (n + p)) := by rw [ih]
+      _ = m - succ (n + p) := rfl
+      _ = m - (n + succ p) := rfl
+
+-- +*^
+theorem pow_distrib_plus_on_exponent : ∀ (m n p : Nat), m ^ (n + p) = (m ^ n) * (m ^ p)
+:=
+  by
+  intros m n p
+  induction p with
+  | zero =>
+    calc
+      m ^ (n + 0)
+        = m ^ n := rfl
+      _ = (m ^ n) * 1 := by rw [mul_one]
+      _ = (m ^ n) * (m ^ 0) := rfl
+  | succ p ih =>
+    calc
+      m ^ (n + succ p)
+        = m ^ succ (n + p) := rfl
+      _ = m ^ (n + p) * m := rfl
+      _ = (m ^ n) * (m ^ p) * m := by rw [ih]
+      _ = (m ^ n) * ((m ^ p) * m) := by rw [mul_assoc]
+      _ = (m ^ n) * (m ^ succ p) := rfl
+
+theorem pow_distrib_mul_on_base : ∀ (m n p : Nat), (m * n) ^ p = (m ^ p) * (n ^ p)
+:=
+  by
+  intros m n p
+  induction p with
+  | zero => rfl
+  | succ p ih =>
+    calc
+      (m * n) ^ succ p
+        = (m * n) ^ p * (m * n) := rfl
+      _ = (m ^ p) * (n ^ p) * (m * n) := by rw [ih]
+      _ = (m ^ p) * (n ^ p) * m * n := by rw [mul_assoc]
+      _ = (m ^ p) * ((n ^ p) * m) * n := by rw [mul_assoc]
+      _ = (m ^ p) * (m * (n ^ p)) * n := by rw [mul_comm m _]
+      _ = (m ^ p) * m * (n ^ p) * n := by rw [mul_assoc]
+      _ = (m ^ succ p) * (n ^ p) * n := rfl
+      _ = (m ^ succ p) * ((n ^ p) * n) := by rw [mul_assoc]
+      _ = (m ^ succ p) * (n ^ succ p) := rfl
+
+theorem pow_mul_assoc : ∀ (m n p : Nat), (m ^ n) ^ p = m ^ (n * p)
+:=
+  by
+  intros m n p
+  induction p with
+  | zero => rfl
+  | succ p ih =>
+    calc
+      (m ^ n) ^ succ p
+        = (m ^ n) ^ p * m ^ n := rfl
+      _ = m ^ (n * p) * m ^ n := by rw [ih]
+      _ = m ^ (n * p + n) := by rw [pow_distrib_plus_on_exponent]
+      _ = m ^ (n * p + n * 1) := by rw [mul_one]
+      _ = m ^ (n * (p + 1)) := by rw [left_distrib]
+      _ = m ^ (n * succ p) := rfl
