@@ -316,3 +316,80 @@ theorem pow_mul_assoc : ∀ (m n p : Nat), (m ^ n) ^ p = m ^ (n * p)
       _ = m ^ (n * p + n * 1) := by rw [mul_one]
       _ = m ^ (n * (p + 1)) := by rw [left_distrib]
       _ = m ^ (n * succ p) := rfl
+
+-- Bin
+inductive Bin where
+  | nothing : Bin
+  | _O : Bin → Bin
+  | _I : Bin → Bin
+
+notation:80 "<>" => Bin.nothing
+notation:80 b " O" => Bin._O b
+notation:80 b " I" => Bin._I b
+
+example : <> O I = Bin._I (Bin._O Bin.nothing) := rfl
+
+def inc : Bin → Bin
+  | <> => <> I
+  | b O => b I
+  | b I => (inc b) O
+
+example: inc (<>      ) = <>     I := rfl
+example: inc (<>     O) = <>     I := rfl
+example: inc (<>     I) = <>   I O := rfl
+example: inc (<>   I O) = <>   I I := rfl
+example: inc (<>   I I) = <> I O O := rfl
+example: inc (<> I O O) = <> I O I := rfl
+
+def to_bin : Nat → Bin
+  | zero => <> O
+  | succ n => inc (to_bin n)
+
+def from_bin : Bin → Nat
+  | <> => zero
+  | b O => (from_bin b) + (from_bin b)
+  | b I => succ ((from_bin b) + (from_bin b))
+
+example : from_bin (to_bin 0) = 0 := rfl
+example : from_bin (to_bin 1) = 1 := rfl
+example : from_bin (to_bin 2) = 2 := rfl
+example : from_bin (to_bin 3) = 3 := rfl
+example : from_bin (to_bin 4) = 4 := rfl
+
+-- Bin-laws
+theorem from_inc_is_suc_from : ∀ (b : Bin),
+  from_bin (inc b) = succ (from_bin b)
+:=
+  by
+  intros b
+  induction b with
+  | nothing => rfl
+  | _O b => rfl
+  | _I b ih =>
+    calc
+      from_bin (inc (b I))
+        = from_bin ((inc b) O) := rfl
+      _ = from_bin (inc b) + from_bin (inc b) := rfl
+      _ = succ (from_bin b) + from_bin (inc b) := by rw [ih]
+      _ = succ (from_bin b) + succ (from_bin b) := by rw [ih]
+      _ = succ (from_bin b) + succ (from_bin b) := rfl
+      _ = succ (succ (from_bin b) + (from_bin b)) := rfl
+      _ = succ ((from_bin b) + succ (from_bin b)) := by rw [comm_add]
+      _ = succ (succ (from_bin b + from_bin b)) := rfl
+      _ = succ (from_bin (b I)) := rfl
+
+-- Counter-example for "to (from b) ≡ b"
+example : to_bin (from_bin Bin.nothing) = Bin._O Bin.nothing := rfl
+
+theorem from_to_bin : ∀ (n : Nat), from_bin (to_bin n) = n
+:=
+  by
+  intros n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    calc
+      from_bin (to_bin (succ n))
+        = from_bin (inc (to_bin n)) := rfl
+      _ = succ (from_bin (to_bin n)) := by rw [from_inc_is_suc_from]
+      _ = succ n := by rw [ih]
